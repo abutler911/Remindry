@@ -145,7 +145,7 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
     try {
       const result = await systemApi.testSMS(
         phone,
-        "Test message from DadBot dashboard!"
+        "Test message from Remindry dashboard!"
       );
       alert(`SMS sent successfully! Message ID: ${result.messageId}`);
     } catch (error) {

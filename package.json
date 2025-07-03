@@ -1,7 +1,7 @@
 {
   "name": "dadbot",
   "version": "1.0.0",
-  "description": "DadBot - Automated reminder system for parents",
+  "description": "Remindry - Automated reminder system for parents",
   "main": "index.js",
   "private": true,
   "workspaces": [

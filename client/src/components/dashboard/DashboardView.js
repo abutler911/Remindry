@@ -1,11 +1,10 @@
-// src/components/dashboard/DashboardView.js
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import DashboardStats from "./DashboardStats";
 import QuickActions from "./QuickActions";
 import ActiveReminders from "./ActiveReminders";
 
-// Animation keyframes
+// Animation keyframes (unchanged)
 const fadeInUp = keyframes`
   from {
     opacity: 0;
@@ -39,170 +38,185 @@ const slideInRight = keyframes`
   }
 `;
 
-// Styled Components
+// Updated Styled Components using theme
 const DashboardContainer = styled.div`
-  padding: 2rem;
+  padding: ${(props) => props.theme.spacing[8]};
   max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(
+    135deg,
+    ${(props) => props.theme.colors.background.secondary} 0%,
+    ${(props) => props.theme.colors.gray[200]} 100%
+  );
 
-  @media (max-width: 768px) {
-    padding: 1rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    padding: ${(props) => props.theme.spacing[4]};
   }
 
   @media (max-width: 480px) {
-    padding: 0.75rem;
+    padding: ${(props) => props.theme.spacing[3]};
   }
 `;
 
 const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: ${(props) => props.theme.spacing[8]};
 
-  @media (min-width: 1024px) {
+  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
     grid-template-columns: 2fr 1fr;
     grid-template-areas:
       "stats stats"
       "actions reminders";
   }
 
-  @media (max-width: 768px) {
-    gap: 1.5rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    gap: ${(props) => props.theme.spacing[6]};
   }
 
   @media (max-width: 480px) {
-    gap: 1rem;
+    gap: ${(props) => props.theme.spacing[4]};
   }
 `;
 
 const StatsSection = styled.section`
-  animation: ${fadeInUp} 0.6s ease-out;
+  animation: ${fadeInUp} ${(props) => props.theme.transition.duration.slow}
+    ease-out;
 
-  @media (min-width: 1024px) {
+  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
     grid-area: stats;
   }
 `;
 
 const ActionsSection = styled.section`
-  animation: ${slideInLeft} 0.7s ease-out 0.1s both;
+  animation: ${slideInLeft} ${(props) => props.theme.transition.duration.slow}
+    ease-out 0.1s both;
 
-  @media (min-width: 1024px) {
+  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
     grid-area: actions;
   }
 `;
 
 const RemindersSection = styled.section`
-  animation: ${slideInRight} 0.7s ease-out 0.2s both;
+  animation: ${slideInRight} ${(props) => props.theme.transition.duration.slow}
+    ease-out 0.2s both;
 
-  @media (min-width: 1024px) {
+  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
     grid-area: reminders;
   }
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: ${(props) => props.theme.spacing[6]};
+  padding-bottom: ${(props) => props.theme.spacing[3]};
+  border-bottom: 2px solid ${(props) => props.theme.colors.border.light};
 
-  @media (max-width: 768px) {
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    margin-bottom: ${(props) => props.theme.spacing[4]};
+    padding-bottom: ${(props) => props.theme.spacing[2]};
   }
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a202c;
+  font-size: ${(props) => props.theme.typography.fontSize.xl};
+  font-weight: ${(props) => props.theme.typography.fontWeight.bold};
+  color: ${(props) => props.theme.colors.text.primary};
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${(props) => props.theme.spacing[2]};
+  font-family: ${(props) => props.theme.typography.fontFamily.sans.join(", ")};
 
-  @media (max-width: 768px) {
-    font-size: 1.25rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.typography.fontSize.lg};
   }
 `;
 
 const SectionSubtitle = styled.p`
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0.25rem 0 0 0;
+  font-size: ${(props) => props.theme.typography.fontSize.sm};
+  color: ${(props) => props.theme.colors.text.secondary};
+  margin: ${(props) => props.theme.spacing[1]} 0 0 0;
+  font-family: ${(props) => props.theme.typography.fontFamily.sans.join(", ")};
 
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.typography.fontSize.xs};
   }
 `;
 
 const ContentCard = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  background: ${(props) => props.theme.colors.background.primary};
+  border-radius: ${(props) => props.theme.borderRadius["2xl"]};
+  padding: ${(props) => props.theme.spacing[6]};
+  box-shadow: ${(props) => props.theme.boxShadow.base};
+  border: 1px solid ${(props) => props.theme.colors.primary.darkest};
+  transition: all ${(props) => props.theme.transition.duration.base}
+    ${(props) => props.theme.transition.timing.easeInOut};
 
   &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: ${(props) => props.theme.boxShadow.lg};
     transform: translateY(-2px);
   }
 
-  @media (max-width: 768px) {
-    padding: 1.25rem;
-    border-radius: 12px;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    padding: ${(props) => props.theme.spacing[5]};
+    border-radius: ${(props) => props.theme.borderRadius.xl};
   }
 
   @media (max-width: 480px) {
-    padding: 1rem;
+    padding: ${(props) => props.theme.spacing[4]};
   }
 `;
 
 const WelcomeSection = styled.div`
   text-align: center;
-  margin-bottom: 3rem;
-  animation: ${fadeInUp} 0.5s ease-out;
+  margin-bottom: ${(props) => props.theme.spacing[12]};
+  animation: ${fadeInUp} ${(props) => props.theme.transition.duration.slow}
+    ease-out;
 
-  @media (max-width: 768px) {
-    margin-bottom: 2rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    margin-bottom: ${(props) => props.theme.spacing[8]};
   }
 `;
 
 const WelcomeTitle = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: ${(props) => props.theme.typography.fontSize["5xl"]};
+  font-weight: ${(props) => props.theme.typography.fontWeight.extrabold};
+  background: linear-gradient(
+    135deg,
+    ${(props) => props.theme.colors.primary.dark} 0%,
+    ${(props) => props.theme.colors.primary.darkest} 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 ${(props) => props.theme.spacing[2]} 0;
+  font-family: ${(props) => props.theme.typography.fontFamily.sans.join(", ")};
 
-  @media (max-width: 768px) {
-    font-size: 2rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.typography.fontSize["3xl"]};
   }
 
   @media (max-width: 480px) {
-    font-size: 1.75rem;
+    font-size: ${(props) => props.theme.typography.fontSize["2xl"]};
   }
 `;
 
 const WelcomeSubtitle = styled.p`
-  font-size: 1.125rem;
-  color: #64748b;
+  font-size: ${(props) => props.theme.typography.fontSize.lg};
+  color: ${(props) => props.theme.colors.text.secondary};
   margin: 0;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  font-family: ${(props) => props.theme.typography.fontFamily.sans.join(", ")};
 
-  @media (max-width: 768px) {
-    font-size: 1rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.typography.fontSize.base};
   }
 
   @media (max-width: 480px) {
-    font-size: 0.9rem;
+    font-size: ${(props) => props.theme.typography.fontSize.sm};
   }
 `;
 

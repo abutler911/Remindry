@@ -1,6 +1,11 @@
 // src/services/api.js
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem("dadbot_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 class ApiError extends Error {
   constructor(message, status, data = null) {
     super(message);
@@ -15,6 +20,7 @@ const apiRequest = async (endpoint, options = {}) => {
   const config = {
     headers: {
       "Content-Type": "application/json",
+      ...getAuthHeaders(),
       ...options.headers,
     },
     ...options,

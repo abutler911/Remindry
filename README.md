@@ -1,10 +1,10 @@
-# 🤖 DadBot - Automated Reminder System
+# 🤖 Remindry - Automated Reminder System
 
 > A command center for parents to automate text message reminders to their children for payments, chores, and other important tasks.
 
 ## 📋 Overview
 
-DadBot is a full-stack application that helps parents automate SMS reminders for:
+Remindry is a full-stack application that helps parents automate SMS reminders for:
 
 - 💰 Car payments, insurance, and other bills
 - 🏠 Chores and responsibilities

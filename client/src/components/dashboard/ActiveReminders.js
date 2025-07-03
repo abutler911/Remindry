@@ -49,8 +49,8 @@ const RemindersList = styled.div`
 `;
 
 const ReminderCardContainer = styled.div`
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgb(184, 182, 223);
+  border: 1px solid gray;
   border-radius: 12px;
   padding: 1.25rem;
   transition: all 0.3s ease;
@@ -70,7 +70,7 @@ const ReminderInfo = styled.div`
 `;
 
 const ReminderTitle = styled.h3`
-  font-size: 1.125rem;
+  font-size: 1.7rem;
   font-weight: 600;
   color: #1a202c;
   margin: 0 0 0.5rem 0;
@@ -78,8 +78,8 @@ const ReminderTitle = styled.h3`
 `;
 
 const ReminderDetails = styled.p`
-  font-size: 0.875rem;
-  color: #64748b;
+  font-size: 0.8rem;
+  color: rgb(0, 0, 0);
   margin: 0 0 0.75rem 0;
   line-height: 1.4;
 `;
@@ -129,11 +129,11 @@ const Button = styled.button`
 `;
 
 const PrimaryButton = styled(Button)`
-  background: #3b82f6;
+  background: rgb(78, 156, 85);
   color: white;
 
   &:hover:not(:disabled) {
-    background: #2563eb;
+    background: rgb(136, 202, 105);
     transform: translateY(-1px);
   }
 `;
