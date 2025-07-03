@@ -1,7 +1,130 @@
 // src/components/dashboard/QuickActions.js
 import React from "react";
+import styled from "styled-components";
 import { Plus, Wifi, MessageCircle, Users } from "lucide-react";
 import { systemApi } from "../../services/api";
+
+// Styled Components
+const ActionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const ActionGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const GroupTitle = styled.h4`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 0.5rem 0;
+  opacity: 0.8;
+`;
+
+const ButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const ActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  }
+`;
+
+const PrimaryActionButton = styled(ActionButton)`
+  border-color: #3182ce;
+  background: linear-gradient(
+    135deg,
+    rgba(49, 130, 206, 0.05) 0%,
+    rgba(49, 130, 206, 0.1) 100%
+  );
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(49, 130, 206, 0.1) 0%,
+      rgba(49, 130, 206, 0.15) 100%
+    );
+    border-color: #2c5aa0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(49, 130, 206, 0.2);
+  }
+`;
+
+const IconContainer = styled.div`
+  flex-shrink: 0;
+  padding: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const PrimaryIcon = styled(IconContainer)`
+  background: #3182ce;
+  color: #ffffff;
+`;
+
+const SecondaryIcon = styled(IconContainer)`
+  background: #e2e8f0;
+  color: #4a5568;
+`;
+
+const ButtonContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+`;
+
+const ButtonLabel = styled.span`
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1.2;
+`;
+
+const ButtonDescription = styled.span`
+  font-size: 0.875rem;
+  color: #4a5568;
+  opacity: 0.8;
+  line-height: 1.3;
+`;
 
 const QuickActions = ({ onAddContact, onAddReminder }) => {
   const handleTestConnection = async () => {
@@ -30,195 +153,58 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
     }
   };
 
-  const styles = {
-    card: {
-      background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-      border: "1px solid #e2e8f0",
-      borderRadius: "12px",
-      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-      overflow: "hidden",
-    },
-    header: {
-      padding: "24px 24px 16px",
-      borderBottom: "1px solid #f1f5f9",
-      background: "#ffffff",
-    },
-    title: {
-      fontSize: "18px",
-      fontWeight: "700",
-      color: "#1a202c",
-      margin: "0 0 4px 0",
-    },
-    subtitle: {
-      fontSize: "14px",
-      color: "#4a5568",
-      margin: "0",
-      opacity: "0.8",
-    },
-    grid: {
-      display: "grid",
-      gridTemplateColumns: window.innerWidth > 768 ? "1fr 1fr" : "1fr",
-      gap: "24px",
-      padding: "24px",
-    },
-    group: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "16px",
-    },
-    groupTitle: {
-      fontSize: "12px",
-      fontWeight: "600",
-      color: "#4a5568",
-      textTransform: "uppercase",
-      letterSpacing: "0.5px",
-      margin: "0 0 8px 0",
-      opacity: "0.8",
-    },
-    buttons: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-    },
-    actionBtn: {
-      display: "flex",
-      alignItems: "center",
-      gap: "16px",
-      padding: "16px",
-      background: "#ffffff",
-      border: "2px solid #e2e8f0",
-      borderRadius: "12px",
-      cursor: "pointer",
-      textAlign: "left",
-      width: "100%",
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-      transition: "all 0.3s ease",
-    },
-    actionBtnPrimary: {
-      borderColor: "#3182ce",
-      background:
-        "linear-gradient(135deg, rgba(49, 130, 206, 0.05) 0%, rgba(49, 130, 206, 0.1) 100%)",
-    },
-    icon: {
-      flexShrink: "0",
-      padding: "8px",
-      borderRadius: "8px",
-    },
-    iconPrimary: {
-      background: "#3182ce",
-      color: "#ffffff",
-    },
-    iconSecondary: {
-      background: "#e2e8f0",
-      color: "#4a5568",
-    },
-    content: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "2px",
-      flex: "1",
-    },
-    label: {
-      fontSize: "16px",
-      fontWeight: "600",
-      color: "#1a202c",
-      lineHeight: "1.2",
-    },
-    desc: {
-      fontSize: "14px",
-      color: "#4a5568",
-      opacity: "0.8",
-      lineHeight: "1.3",
-    },
-  };
-
-  const handleHover = (e, isEntering) => {
-    const style = e.currentTarget.style;
-    style.transform = isEntering ? "translateY(-2px)" : "translateY(0)";
-    style.boxShadow = isEntering
-      ? "0 8px 20px rgba(0, 0, 0, 0.1)"
-      : "0 2px 8px rgba(0, 0, 0, 0.04)";
-  };
-
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
-        <h3 style={styles.title}>Quick Actions</h3>
-        <p style={styles.subtitle}>Common tasks and testing tools</p>
-      </div>
+    <ActionsGrid>
+      <ActionGroup>
+        <GroupTitle>System Tests</GroupTitle>
+        <ButtonsContainer>
+          <ActionButton onClick={handleTestConnection}>
+            <SecondaryIcon>
+              <Wifi size={20} />
+            </SecondaryIcon>
+            <ButtonContent>
+              <ButtonLabel>Test Connection</ButtonLabel>
+              <ButtonDescription>Check backend status</ButtonDescription>
+            </ButtonContent>
+          </ActionButton>
 
-      <div style={styles.grid}>
-        <div style={styles.group}>
-          <h4 style={styles.groupTitle}>System Tests</h4>
-          <div style={styles.buttons}>
-            <button
-              onClick={handleTestConnection}
-              style={{ ...styles.actionBtn }}
-              onMouseEnter={(e) => handleHover(e, true)}
-              onMouseLeave={(e) => handleHover(e, false)}
-            >
-              <div style={{ ...styles.icon, ...styles.iconSecondary }}>
-                <Wifi size={20} />
-              </div>
-              <div style={styles.content}>
-                <span style={styles.label}>Test Connection</span>
-                <span style={styles.desc}>Check backend status</span>
-              </div>
-            </button>
+          <ActionButton onClick={handleTestSMS}>
+            <SecondaryIcon>
+              <MessageCircle size={20} />
+            </SecondaryIcon>
+            <ButtonContent>
+              <ButtonLabel>Test SMS</ButtonLabel>
+              <ButtonDescription>Send test message</ButtonDescription>
+            </ButtonContent>
+          </ActionButton>
+        </ButtonsContainer>
+      </ActionGroup>
 
-            <button
-              onClick={handleTestSMS}
-              style={{ ...styles.actionBtn }}
-              onMouseEnter={(e) => handleHover(e, true)}
-              onMouseLeave={(e) => handleHover(e, false)}
-            >
-              <div style={{ ...styles.icon, ...styles.iconSecondary }}>
-                <MessageCircle size={20} />
-              </div>
-              <div style={styles.content}>
-                <span style={styles.label}>Test SMS</span>
-                <span style={styles.desc}>Send test message</span>
-              </div>
-            </button>
-          </div>
-        </div>
+      <ActionGroup>
+        <GroupTitle>Create New</GroupTitle>
+        <ButtonsContainer>
+          <PrimaryActionButton onClick={onAddContact}>
+            <PrimaryIcon>
+              <Users size={20} />
+            </PrimaryIcon>
+            <ButtonContent>
+              <ButtonLabel>Add Contact</ButtonLabel>
+              <ButtonDescription>Add family member</ButtonDescription>
+            </ButtonContent>
+          </PrimaryActionButton>
 
-        <div style={styles.group}>
-          <h4 style={styles.groupTitle}>Create New</h4>
-          <div style={styles.buttons}>
-            <button
-              onClick={onAddContact}
-              style={{ ...styles.actionBtn, ...styles.actionBtnPrimary }}
-              onMouseEnter={(e) => handleHover(e, true)}
-              onMouseLeave={(e) => handleHover(e, false)}
-            >
-              <div style={{ ...styles.icon, ...styles.iconPrimary }}>
-                <Users size={20} />
-              </div>
-              <div style={styles.content}>
-                <span style={styles.label}>Add Contact</span>
-                <span style={styles.desc}>Add family member</span>
-              </div>
-            </button>
-
-            <button
-              onClick={onAddReminder}
-              style={{ ...styles.actionBtn, ...styles.actionBtnPrimary }}
-              onMouseEnter={(e) => handleHover(e, true)}
-              onMouseLeave={(e) => handleHover(e, false)}
-            >
-              <div style={{ ...styles.icon, ...styles.iconPrimary }}>
-                <Plus size={20} />
-              </div>
-              <div style={styles.content}>
-                <span style={styles.label}>Add Reminder</span>
-                <span style={styles.desc}>Create automation</span>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          <PrimaryActionButton onClick={onAddReminder}>
+            <PrimaryIcon>
+              <Plus size={20} />
+            </PrimaryIcon>
+            <ButtonContent>
+              <ButtonLabel>Add Reminder</ButtonLabel>
+              <ButtonDescription>Create automation</ButtonDescription>
+            </ButtonContent>
+          </PrimaryActionButton>
+        </ButtonsContainer>
+      </ActionGroup>
+    </ActionsGrid>
   );
 };
 

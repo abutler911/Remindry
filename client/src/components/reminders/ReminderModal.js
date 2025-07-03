@@ -1,8 +1,307 @@
 // src/components/reminders/ReminderModal.js
 import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 import { Save } from "lucide-react";
-import Modal from "../ui/Modal";
-import Button from "../ui/Button";
+
+// Modal Styled Components (simplified version for this component)
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  opacity: ${(props) => (props.isOpen ? 1 : 0)};
+  visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
+  transition: all 0.3s ease;
+`;
+
+const ModalContainer = styled.div`
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: ${(props) =>
+    props.isOpen ? "scale(1) translateY(0)" : "scale(0.95) translateY(20px)"};
+  transition: all 0.3s ease;
+`;
+
+const ModalHeader = styled.div`
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+`;
+
+const ModalBody = styled.div`
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+`;
+
+const ModalFooter = styled.div`
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+// Form Styled Components
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  ${(props) =>
+    props.fullWidth &&
+    `
+    @media (min-width: 640px) {
+      grid-column: 1 / -1;
+    }
+  `}
+`;
+
+const FormLabel = styled.label`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+
+  &::after {
+    content: ${(props) => (props.required ? '" *"' : '""')};
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+`;
+
+const FormInput = styled.input`
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &:invalid {
+    border-color: #ef4444;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+`;
+
+const FormTextarea = styled.textarea`
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+`;
+
+const FormSelect = styled.select`
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+`;
+
+const FormHint = styled.p`
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+  margin-top: 0.25rem;
+`;
+
+// Recipients Grid Components
+const RecipientsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const RecipientOption = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  &:has(input:checked) {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+  }
+`;
+
+const RecipientCheckbox = styled.input`
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: #3b82f6;
+  cursor: pointer;
+`;
+
+const RecipientInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+`;
+
+const RecipientName = styled.span`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+const RecipientPhone = styled.span`
+  font-size: 0.75rem;
+  color: #6b7280;
+`;
+
+// Button Components
+const Button = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const PrimaryButton = styled(Button)`
+  background: #3b82f6;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+`;
+
+const SecondaryButton = styled(Button)`
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+`;
+
+const ButtonContainer = styled.div`
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
 
 const ReminderModal = ({
   isOpen,
@@ -103,168 +402,191 @@ const ReminderModal = ({
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget && !loading) {
+      onClose();
+    }
+  };
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen && !loading) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, loading, onClose]);
+
+  if (!isOpen) return null;
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={editingReminder ? "Edit Reminder" : "Add New Reminder"}
-      size="lg"
-    >
-      <form onSubmit={handleSubmit}>
-        <div className="form-grid">
-          <div className="form-group">
-            <label className="form-label" htmlFor="reminder-title">
-              Title *
-            </label>
-            <input
-              id="reminder-title"
-              type="text"
-              className="form-input"
-              value={formData.title}
-              onChange={handleChange("title")}
-              placeholder="Car Payment"
-              required
-              autoFocus
-            />
-          </div>
+    <ModalOverlay isOpen={isOpen} onClick={handleOverlayClick}>
+      <ModalContainer isOpen={isOpen}>
+        <ModalHeader>
+          <ModalTitle>
+            {editingReminder ? "Edit Reminder" : "Add New Reminder"}
+          </ModalTitle>
+        </ModalHeader>
 
-          <div className="form-group form-group-full">
-            <label className="form-label" htmlFor="reminder-message">
-              Message Template *
-            </label>
-            <textarea
-              id="reminder-message"
-              className="form-input form-textarea"
-              rows="3"
-              value={formData.message}
-              onChange={handleChange("message")}
-              placeholder="Hey {name}, your {title} of {amount} is due on {dueDate}. Please pay it today!"
-              required
-            />
-            <p className="form-hint">
-              Use variables: {"{name}"}, {"{title}"}, {"{amount}"},{" "}
-              {"{dueDate}"}
-            </p>
-          </div>
+        <ModalBody>
+          <Form onSubmit={handleSubmit}>
+            <FormGrid>
+              <FormGroup>
+                <FormLabel htmlFor="reminder-title" required>
+                  Title
+                </FormLabel>
+                <FormInput
+                  id="reminder-title"
+                  type="text"
+                  value={formData.title}
+                  onChange={handleChange("title")}
+                  placeholder="Car Payment"
+                  required
+                  autoFocus
+                  disabled={loading}
+                />
+              </FormGroup>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="reminder-amount">
-              Amount ($)
-            </label>
-            <input
-              id="reminder-amount"
-              type="number"
-              className="form-input"
-              value={formData.amount}
-              onChange={handleChange("amount")}
-              placeholder="450"
-              min="0"
-              step="0.01"
-            />
-          </div>
+              <FormGroup fullWidth>
+                <FormLabel htmlFor="reminder-message" required>
+                  Message Template
+                </FormLabel>
+                <FormTextarea
+                  id="reminder-message"
+                  rows="3"
+                  value={formData.message}
+                  onChange={handleChange("message")}
+                  placeholder="Hey {name}, your {title} of {amount} is due on {dueDate}. Please pay it today!"
+                  required
+                  disabled={loading}
+                />
+                <FormHint>
+                  Use variables: {"{name}"}, {"{title}"}, {"{amount}"},{" "}
+                  {"{dueDate}"}
+                </FormHint>
+              </FormGroup>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="reminder-due-date">
-              Due Date
-            </label>
-            <input
-              id="reminder-due-date"
-              type="date"
-              className="form-input"
-              value={formData.dueDate}
-              onChange={handleChange("dueDate")}
-            />
-          </div>
+              <FormGroup>
+                <FormLabel htmlFor="reminder-amount">Amount ($)</FormLabel>
+                <FormInput
+                  id="reminder-amount"
+                  type="number"
+                  value={formData.amount}
+                  onChange={handleChange("amount")}
+                  placeholder="450"
+                  min="0"
+                  step="0.01"
+                  disabled={loading}
+                />
+              </FormGroup>
 
-          <div className="form-group form-group-full">
-            <label className="form-label">Recipients *</label>
-            {contacts.length === 0 ? (
-              <p className="form-hint">
-                No contacts available. Please add contacts first.
-              </p>
-            ) : (
-              <div className="recipients-grid">
-                {contacts.map((contact) => (
-                  <label key={contact._id} className="recipient-option">
-                    <input
-                      type="checkbox"
-                      checked={formData.recipients.includes(contact._id)}
-                      onChange={handleRecipientChange(contact._id)}
-                      className="recipient-checkbox"
-                    />
-                    <span className="recipient-name">{contact.name}</span>
-                    <span className="recipient-phone">{contact.phone}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+              <FormGroup>
+                <FormLabel htmlFor="reminder-due-date">Due Date</FormLabel>
+                <FormInput
+                  id="reminder-due-date"
+                  type="date"
+                  value={formData.dueDate}
+                  onChange={handleChange("dueDate")}
+                  disabled={loading}
+                />
+              </FormGroup>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="schedule-type">
-              Schedule Type
-            </label>
-            <select
-              id="schedule-type"
-              className="form-input"
-              value={formData.schedule.type}
-              onChange={handleScheduleChange("type")}
-            >
-              <option value="monthly">Monthly</option>
-              <option value="weekly">Weekly</option>
-              <option value="one-time">One-time</option>
-            </select>
-          </div>
+              <FormGroup fullWidth>
+                <FormLabel required>Recipients</FormLabel>
+                {contacts.length === 0 ? (
+                  <FormHint>
+                    No contacts available. Please add contacts first.
+                  </FormHint>
+                ) : (
+                  <RecipientsGrid>
+                    {contacts.map((contact) => (
+                      <RecipientOption key={contact._id}>
+                        <RecipientCheckbox
+                          type="checkbox"
+                          checked={formData.recipients.includes(contact._id)}
+                          onChange={handleRecipientChange(contact._id)}
+                          disabled={loading}
+                        />
+                        <RecipientInfo>
+                          <RecipientName>{contact.name}</RecipientName>
+                          <RecipientPhone>{contact.phone}</RecipientPhone>
+                        </RecipientInfo>
+                      </RecipientOption>
+                    ))}
+                  </RecipientsGrid>
+                )}
+              </FormGroup>
 
-          {formData.schedule.type === "monthly" && (
-            <div className="form-group">
-              <label className="form-label" htmlFor="day-of-month">
-                Day of Month
-              </label>
-              <input
-                id="day-of-month"
-                type="number"
-                min="1"
-                max="31"
-                className="form-input"
-                value={formData.schedule.dayOfMonth}
-                onChange={handleScheduleChange("dayOfMonth")}
-              />
-            </div>
-          )}
-        </div>
+              <FormGroup>
+                <FormLabel htmlFor="schedule-type">Schedule Type</FormLabel>
+                <FormSelect
+                  id="schedule-type"
+                  value={formData.schedule.type}
+                  onChange={handleScheduleChange("type")}
+                  disabled={loading}
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="one-time">One-time</option>
+                </FormSelect>
+              </FormGroup>
 
-        <div style={{ marginTop: "1.5rem" }}>
-          <Button
-            type="submit"
-            fullWidth
-            disabled={
-              loading ||
-              !formData.title.trim() ||
-              !formData.message.trim() ||
-              formData.recipients.length === 0
-            }
-            icon={<Save size={16} />}
-          >
-            {loading
-              ? "Saving..."
-              : editingReminder
-              ? "Update Reminder"
-              : "Create Reminder"}
-          </Button>
+              {formData.schedule.type === "monthly" && (
+                <FormGroup>
+                  <FormLabel htmlFor="day-of-month">Day of Month</FormLabel>
+                  <FormInput
+                    id="day-of-month"
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={formData.schedule.dayOfMonth}
+                    onChange={handleScheduleChange("dayOfMonth")}
+                    disabled={loading}
+                  />
+                </FormGroup>
+              )}
+            </FormGrid>
 
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={onClose}
-            disabled={loading}
-            style={{ marginTop: "0.5rem" }}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </Modal>
+            <ButtonContainer>
+              <PrimaryButton
+                type="submit"
+                disabled={
+                  loading ||
+                  !formData.title.trim() ||
+                  !formData.message.trim() ||
+                  formData.recipients.length === 0
+                }
+              >
+                <Save size={16} />
+                {loading
+                  ? "Saving..."
+                  : editingReminder
+                  ? "Update Reminder"
+                  : "Create Reminder"}
+              </PrimaryButton>
+
+              <SecondaryButton
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancel
+              </SecondaryButton>
+            </ButtonContainer>
+          </Form>
+        </ModalBody>
+      </ModalContainer>
+    </ModalOverlay>
   );
 };
 

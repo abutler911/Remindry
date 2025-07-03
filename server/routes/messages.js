@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
+const Reminder = require("../models/Reminder");
 
 // GET all messages with pagination
 router.get("/", async (req, res) => {
@@ -69,11 +70,12 @@ router.put("/:id/paid", async (req, res) => {
 router.get("/stats/dashboard", async (req, res) => {
   try {
     const totalSent = await Message.countDocuments({ status: "sent" });
-    const totalPaid = await Message.countDocuments({ isPaid: true });
     const pendingPayments = await Message.countDocuments({
       isPaid: false,
       status: "sent",
     });
+
+    const activeReminders = await Reminder.countDocuments({ isActive: true });
 
     // Recent activity
     const recentMessages = await Message.find()
@@ -84,8 +86,8 @@ router.get("/stats/dashboard", async (req, res) => {
 
     res.json({
       totalSent,
-      totalPaid,
       pendingPayments,
+      activeReminders,
       recentMessages,
     });
   } catch (error) {

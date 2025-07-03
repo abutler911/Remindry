@@ -1,8 +1,8 @@
 /* DadBot Dashboard - Main Application Styles */
 
 /* Import dependencies in correct order */
-@import "./styles/variables.css";
-@import "./styles/components.css";
+/* @import "./styles/variables.css"; */
+/* @import "./styles/components.css"; */
 
 /* Base Reset - Only if not in components.css */
 * {
