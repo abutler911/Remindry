@@ -6,7 +6,7 @@
 
 Remindry is a full-stack application that helps parents automate SMS reminders for:
 
-- 💰 Car payments, insurance, and other bills
+- 💰 Car payments, insurance, and other bills, life events.
 - 🏠 Chores and responsibilities
 - 📅 Important dates and deadlines
 - 💳 Allowance and financial reminders
