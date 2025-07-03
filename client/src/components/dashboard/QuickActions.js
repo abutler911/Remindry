@@ -1,8 +1,6 @@
 // src/components/dashboard/QuickActions.js
 import React from "react";
-import { Plus, Wifi, MessageCircle, Users, Settings } from "lucide-react";
-import { Card } from "../ui/Card";
-import Button from "../ui/Button";
+import { Plus, Wifi, MessageCircle, Users } from "lucide-react";
 import { systemApi } from "../../services/api";
 
 const QuickActions = ({ onAddContact, onAddReminder }) => {
@@ -32,7 +30,6 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
     }
   };
 
-  // Inline styles to guarantee they work
   const styles = {
     card: {
       background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
@@ -102,14 +99,10 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
       background:
         "linear-gradient(135deg, rgba(49, 130, 206, 0.05) 0%, rgba(49, 130, 206, 0.1) 100%)",
     },
-    actionBtnSecondary: {
-      borderColor: "#e2e8f0",
-    },
     icon: {
       flexShrink: "0",
       padding: "8px",
       borderRadius: "8px",
-      transition: "all 0.3s ease",
     },
     iconPrimary: {
       background: "#3182ce",
@@ -139,6 +132,14 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
     },
   };
 
+  const handleHover = (e, isEntering) => {
+    const style = e.currentTarget.style;
+    style.transform = isEntering ? "translateY(-2px)" : "translateY(0)";
+    style.boxShadow = isEntering
+      ? "0 8px 20px rgba(0, 0, 0, 0.1)"
+      : "0 2px 8px rgba(0, 0, 0, 0.04)";
+  };
+
   return (
     <div style={styles.card}>
       <div style={styles.header}>
@@ -147,21 +148,14 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
       </div>
 
       <div style={styles.grid}>
-        {/* System Tests */}
         <div style={styles.group}>
           <h4 style={styles.groupTitle}>System Tests</h4>
           <div style={styles.buttons}>
             <button
               onClick={handleTestConnection}
-              style={{ ...styles.actionBtn, ...styles.actionBtnSecondary }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-2px)";
-                e.target.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0px)";
-                e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.04)";
-              }}
+              style={{ ...styles.actionBtn }}
+              onMouseEnter={(e) => handleHover(e, true)}
+              onMouseLeave={(e) => handleHover(e, false)}
             >
               <div style={{ ...styles.icon, ...styles.iconSecondary }}>
                 <Wifi size={20} />
@@ -174,15 +168,9 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
 
             <button
               onClick={handleTestSMS}
-              style={{ ...styles.actionBtn, ...styles.actionBtnSecondary }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-2px)";
-                e.target.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0px)";
-                e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.04)";
-              }}
+              style={{ ...styles.actionBtn }}
+              onMouseEnter={(e) => handleHover(e, true)}
+              onMouseLeave={(e) => handleHover(e, false)}
             >
               <div style={{ ...styles.icon, ...styles.iconSecondary }}>
                 <MessageCircle size={20} />
@@ -195,21 +183,14 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
           </div>
         </div>
 
-        {/* Create New */}
         <div style={styles.group}>
           <h4 style={styles.groupTitle}>Create New</h4>
           <div style={styles.buttons}>
             <button
               onClick={onAddContact}
               style={{ ...styles.actionBtn, ...styles.actionBtnPrimary }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-2px)";
-                e.target.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0px)";
-                e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.04)";
-              }}
+              onMouseEnter={(e) => handleHover(e, true)}
+              onMouseLeave={(e) => handleHover(e, false)}
             >
               <div style={{ ...styles.icon, ...styles.iconPrimary }}>
                 <Users size={20} />
@@ -223,14 +204,8 @@ const QuickActions = ({ onAddContact, onAddReminder }) => {
             <button
               onClick={onAddReminder}
               style={{ ...styles.actionBtn, ...styles.actionBtnPrimary }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-2px)";
-                e.target.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0px)";
-                e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.04)";
-              }}
+              onMouseEnter={(e) => handleHover(e, true)}
+              onMouseLeave={(e) => handleHover(e, false)}
             >
               <div style={{ ...styles.icon, ...styles.iconPrimary }}>
                 <Plus size={20} />

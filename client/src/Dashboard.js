@@ -6,6 +6,10 @@ import ContactsView from "./components/contacts/ContactsView";
 import RemindersView from "./components/reminders/RemindersView";
 import { useDashboard } from "./hooks/useDashboard";
 import { useModal } from "./hooks/useModal";
+import Modal from "./components/ui/Modal";
+import Button from "./components/ui/Button";
+import ContactModal from "./components/contacts/ContactModal";
+import ReminderModal from "./components/reminders/ReminderModal";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -174,6 +178,20 @@ const Dashboard = () => {
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
       {renderCurrentView()}
+      <ContactModal
+        isOpen={contactModal.isOpen}
+        onClose={contactModal.close}
+        onSave={handleCreateContact}
+        loading={loading}
+      />
+
+      <ReminderModal
+        isOpen={reminderModal.isOpen}
+        onClose={reminderModal.close}
+        onSave={handleCreateReminder}
+        contacts={contacts}
+        loading={loading}
+      />
     </Layout>
   );
 };

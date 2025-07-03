@@ -25,8 +25,6 @@ const Card = ({
     </div>
   );
 };
-
-// src/components/ui/StatCard.js
 const StatCard = ({
   label,
   value,
@@ -47,7 +45,6 @@ const StatCard = ({
   );
 };
 
-// src/components/ui/EmptyState.js
 const EmptyState = ({
   message,
   icon: Icon = null,

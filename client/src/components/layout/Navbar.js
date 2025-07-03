@@ -1,12 +1,6 @@
-// src/components/layout/Navbar.js - Redesigned Navigation
+// src/components/layout/Navbar.js
 import React from "react";
-import {
-  Calendar,
-  MessageSquare,
-  Users,
-  BarChart3,
-  Settings,
-} from "lucide-react";
+import { Calendar, MessageSquare, Users, BarChart3 } from "lucide-react";
 
 const navItems = [
   {
@@ -52,23 +46,23 @@ const Navbar = ({
 
   return (
     <>
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="mobile-overlay" onClick={onMobileMenuClose} />
       )}
 
-      {/* Navigation */}
       <nav className={`app-nav ${isMobileMenuOpen ? "nav-mobile-open" : ""}`}>
         <div className="nav-container">
-          {/* Mobile Menu Header */}
           <div className="nav-mobile-header">
-            <h3>Navigation</h3>
-            <button onClick={onMobileMenuClose} className="nav-close-btn">
+            <h3 className="nav-header-title">Navigation</h3>
+            <button
+              onClick={onMobileMenuClose}
+              className="nav-close-btn"
+              aria-label="Close menu"
+            >
               ×
             </button>
           </div>
 
-          {/* Navigation Tabs */}
           <div className="nav-tabs">
             {navItems.map(({ id, label, icon: Icon, description, color }) => (
               <button
@@ -89,14 +83,6 @@ const Navbar = ({
                 {activeTab === id && <div className="nav-tab-indicator" />}
               </button>
             ))}
-          </div>
-
-          {/* Mobile Settings */}
-          <div className="nav-mobile-footer">
-            <button className="nav-settings-btn">
-              <Settings size={18} />
-              <span>Settings</span>
-            </button>
           </div>
         </div>
       </nav>

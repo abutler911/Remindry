@@ -12,7 +12,7 @@ const ReminderModal = ({
   contacts = [],
   loading = false,
 }) => {
-  const [formData, setFormData] = useState({
+  const defaultState = {
     title: "",
     message: "",
     recipients: [],
@@ -24,9 +24,10 @@ const ReminderModal = ({
       time: "10:00",
     },
     reminderOffsets: [3, 1, 0],
-  });
+  };
 
-  // Reset form when modal opens/closes or editing reminder changes
+  const [formData, setFormData] = useState(defaultState);
+
   useEffect(() => {
     if (isOpen) {
       if (editingReminder) {
@@ -38,49 +39,14 @@ const ReminderModal = ({
           dueDate: editingReminder.dueDate
             ? new Date(editingReminder.dueDate).toISOString().split("T")[0]
             : "",
-          schedule: editingReminder.schedule || {
-            type: "monthly",
-            dayOfMonth: 15,
-            time: "10:00",
-          },
+          schedule: editingReminder.schedule || defaultState.schedule,
           reminderOffsets: editingReminder.reminderOffsets || [3, 1, 0],
         });
       } else {
-        setFormData({
-          title: "",
-          message: "",
-          recipients: [],
-          amount: "",
-          dueDate: "",
-          schedule: {
-            type: "monthly",
-            dayOfMonth: 15,
-            time: "10:00",
-          },
-          reminderOffsets: [3, 1, 0],
-        });
+        setFormData(defaultState);
       }
     }
   }, [isOpen, editingReminder]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const reminderData = {
-      ...formData,
-      amount: formData.amount ? parseFloat(formData.amount) : null,
-      dueDate: formData.dueDate
-        ? new Date(formData.dueDate).toISOString()
-        : null,
-    };
-
-    try {
-      await onSave(reminderData);
-      onClose();
-    } catch (error) {
-      // Error handling is done in the parent component
-    }
-  };
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({
@@ -101,56 +67,47 @@ const ReminderModal = ({
     }));
   };
 
-  const handleRecipientChange = (contactId) => (e) => {
+  const handleRecipientChange = (id) => (e) => {
     if (e.target.checked) {
       setFormData((prev) => ({
         ...prev,
-        recipients: [...prev.recipients, contactId],
+        recipients: [...prev.recipients, id],
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        recipients: prev.recipients.filter((id) => id !== contactId),
+        recipients: prev.recipients.filter((rid) => rid !== id),
       }));
     }
   };
 
-  const actions = (
-    <>
-      <Button
-        type="submit"
-        fullWidth
-        disabled={
-          loading ||
-          !formData.title.trim() ||
-          !formData.message.trim() ||
-          formData.recipients.length === 0
-        }
-        icon={<Save size={16} />}
-      >
-        {loading
-          ? "Saving..."
-          : editingReminder
-          ? "Update Reminder"
-          : "Create Reminder"}
-      </Button>
-      <Button
-        variant="secondary"
-        fullWidth
-        onClick={onClose}
-        disabled={loading}
-      >
-        Cancel
-      </Button>
-    </>
-  );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Force the due date to local midnight to avoid timezone shift
+    const localMidnightDueDate = formData.dueDate
+      ? new Date(`${formData.dueDate}T00:00:00`)
+      : null;
+
+    const reminderData = {
+      ...formData,
+      amount: formData.amount ? parseFloat(formData.amount) : null,
+      dueDate: localMidnightDueDate ? localMidnightDueDate.toISOString() : null,
+    };
+
+    try {
+      await onSave(reminderData);
+      onClose();
+    } catch (error) {
+      console.error("Save failed", error);
+    }
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={editingReminder ? "Edit Reminder" : "Add New Reminder"}
-      actions={actions}
       size="lg"
     >
       <form onSubmit={handleSubmit}>
@@ -165,7 +122,7 @@ const ReminderModal = ({
               className="form-input"
               value={formData.title}
               onChange={handleChange("title")}
-              placeholder="Car Payment Reminder"
+              placeholder="Car Payment"
               required
               autoFocus
             />
@@ -181,12 +138,12 @@ const ReminderModal = ({
               rows="3"
               value={formData.message}
               onChange={handleChange("message")}
-              placeholder="Hey {name}, your {title} of {amount} is due on {dueDate}. Please pay it today! Love, Dad"
+              placeholder="Hey {name}, your {title} of {amount} is due on {dueDate}. Please pay it today!"
               required
             />
             <p className="form-hint">
-              Use variables: {"{name}"}, {"{amount}"}, {"{dueDate}"},{" "}
-              {"{title}"}
+              Use variables: {"{name}"}, {"{title}"}, {"{amount}"},{" "}
+              {"{dueDate}"}
             </p>
           </div>
 
@@ -244,11 +201,11 @@ const ReminderModal = ({
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="reminder-schedule-type">
+            <label className="form-label" htmlFor="schedule-type">
               Schedule Type
             </label>
             <select
-              id="reminder-schedule-type"
+              id="schedule-type"
               className="form-input"
               value={formData.schedule.type}
               onChange={handleScheduleChange("type")}
@@ -261,11 +218,11 @@ const ReminderModal = ({
 
           {formData.schedule.type === "monthly" && (
             <div className="form-group">
-              <label className="form-label" htmlFor="reminder-day-of-month">
+              <label className="form-label" htmlFor="day-of-month">
                 Day of Month
               </label>
               <input
-                id="reminder-day-of-month"
+                id="day-of-month"
                 type="number"
                 min="1"
                 max="31"
@@ -275,6 +232,36 @@ const ReminderModal = ({
               />
             </div>
           )}
+        </div>
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <Button
+            type="submit"
+            fullWidth
+            disabled={
+              loading ||
+              !formData.title.trim() ||
+              !formData.message.trim() ||
+              formData.recipients.length === 0
+            }
+            icon={<Save size={16} />}
+          >
+            {loading
+              ? "Saving..."
+              : editingReminder
+              ? "Update Reminder"
+              : "Create Reminder"}
+          </Button>
+
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={onClose}
+            disabled={loading}
+            style={{ marginTop: "0.5rem" }}
+          >
+            Cancel
+          </Button>
         </div>
       </form>
     </Modal>

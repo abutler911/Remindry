@@ -45,7 +45,7 @@ DadBot/
 
 ```bash
 # 1. Clone and setup
-git clone xxxxxxxx
+git clone https://github.com/abutler911/DadBot.git
 cd DadBot
 
 # 2. Install all dependencies
