@@ -36,7 +36,9 @@ const StatsGrid = styled.div`
   }
 `;
 
-const StatCard = styled.div`
+const StatCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "delay",
+})`
   background: white;
   border-radius: 16px;
   padding: 1.5rem;

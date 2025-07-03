@@ -34,7 +34,9 @@ const navItems = [
   },
 ];
 
-const AppNav = styled.nav`
+const AppNav = styled.nav.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   position: fixed;
   top: 0;
   left: 0;
@@ -134,7 +136,9 @@ const getColorStyles = (color, isActive) => {
   return colors[color] || colors.blue;
 };
 
-const NavTab = styled.button`
+const NavTab = styled.button.withConfig({
+  shouldForwardProp: (prop) => !["color", "isActive"].includes(prop),
+})`
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -165,7 +169,9 @@ const NavTab = styled.button`
   }
 `;
 
-const NavTabIcon = styled.div`
+const NavTabIcon = styled.div.withConfig({
+  shouldForwardProp: (prop) => !["color", "isActive"].includes(prop),
+})`
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -185,7 +191,9 @@ const NavTabContent = styled.div`
   gap: 0.25rem;
 `;
 
-const NavTabLabel = styled.span`
+const NavTabLabel = styled.span.withConfig({
+  shouldForwardProp: (prop) => !["color", "isActive"].includes(prop),
+})`
   font-size: 0.9rem;
   font-weight: 600;
   color: ${(props) => getColorStyles(props.color, props.isActive).text};
@@ -198,7 +206,9 @@ const NavTabDescription = styled.span`
   font-weight: 500;
 `;
 
-const NavTabIndicator = styled.div`
+const NavTabIndicator = styled.div.withConfig({
+  shouldForwardProp: (prop) => !["color", "isActive"].includes(prop),
+})`
   position: absolute;
   right: 0.75rem;
   top: 50%;

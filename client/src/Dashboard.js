@@ -205,12 +205,35 @@ const Dashboard = () => {
   const handleSendReminder = async (id) => {
     try {
       const result = await sendManualReminder(id);
+
+      // Format the results in a user-friendly way
+      const results = result.results || [];
+      const successCount = results.filter((r) => r.success).length;
+      const failureCount = results.filter((r) => !r.success).length;
+
+      let message = "";
+      if (successCount > 0 && failureCount === 0) {
+        message = `Reminder sent successfully to ${successCount} recipient${
+          successCount > 1 ? "s" : ""
+        }!`;
+      } else if (successCount > 0 && failureCount > 0) {
+        message = `Reminder sent to ${successCount} recipient${
+          successCount > 1 ? "s" : ""
+        }, but failed for ${failureCount} recipient${
+          failureCount > 1 ? "s" : ""
+        }.`;
+      } else if (failureCount > 0) {
+        message = `Failed to send reminder to ${failureCount} recipient${
+          failureCount > 1 ? "s" : ""
+        }.`;
+      } else {
+        message = "Reminder processed successfully!";
+      }
+
       alert.showAlert({
-        title: "Success",
-        message: `Reminder sent successfully! Results: ${JSON.stringify(
-          result.results
-        )}`,
-        type: "success",
+        title: "Reminder Sent",
+        message: message,
+        type: successCount > 0 ? "success" : "warning",
       });
     } catch (error) {
       alert.showAlert({

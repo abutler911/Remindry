@@ -29,7 +29,9 @@ const HeaderLeft = styled.div`
   height: 4rem;
 `;
 
-const MobileMenuButton = styled.button`
+const MobileMenuButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})`
   display: none;
   align-items: center;
   justify-content: center;

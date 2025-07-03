@@ -4,7 +4,11 @@ import styled, { keyframes } from "styled-components";
 import { Plus, Users } from "lucide-react";
 import ContactCard from "./ContactCard";
 import ContactModal from "./ContactModal";
+import ConfirmationModal from "../ui/ConfirmationModal";
+import AlertModal from "../ui/AlertModal";
 import { useModal } from "../../hooks/useModal";
+import { useConfirmation } from "../../hooks/useConfirmation";
+import { useAlert } from "../../hooks/useAlert";
 
 // Animation keyframes
 const fadeIn = keyframes`
@@ -228,28 +232,68 @@ const ContactsView = ({
   loading,
 }) => {
   const contactModal = useModal();
+  const confirmation = useConfirmation();
+  const alert = useAlert();
 
   const handleEdit = (contact) => {
     contactModal.open(contact);
   };
 
-  const handleDelete = async (contactId) => {
-    if (window.confirm("Are you sure you want to delete this contact?")) {
+  const handleDelete = async (contactId, contactName) => {
+    // Use custom confirmation modal instead of window.confirm
+    const confirmed = await confirmation.confirm({
+      title: "Delete Contact",
+      message: `Are you sure you want to delete "${contactName}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+
+    if (confirmed) {
       try {
         await onDeleteContact(contactId);
+        // Use custom alert instead of window.alert
+        alert.showAlert({
+          title: "Success",
+          message: "Contact deleted successfully!",
+          type: "success",
+        });
       } catch (error) {
-        alert("Failed to delete contact: " + error.message);
+        alert.showAlert({
+          title: "Error",
+          message: `Failed to delete contact: ${error.message}`,
+          type: "error",
+        });
       }
     }
   };
 
   const handleSave = async (contactData) => {
-    if (contactModal.data) {
-      // Editing existing contact
-      await onUpdateContact(contactModal.data._id, contactData);
-    } else {
-      // Creating new contact
-      await onCreateContact(contactData);
+    try {
+      if (contactModal.data) {
+        // Editing existing contact
+        await onUpdateContact(contactModal.data._id, contactData);
+        alert.showAlert({
+          title: "Success",
+          message: "Contact updated successfully!",
+          type: "success",
+        });
+      } else {
+        // Creating new contact
+        await onCreateContact(contactData);
+        alert.showAlert({
+          title: "Success",
+          message: "Contact created successfully!",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      alert.showAlert({
+        title: "Error",
+        message: `Failed to save contact: ${error.message}`,
+        type: "error",
+      });
+      throw error; // Re-throw so modal doesn't close
     }
   };
 
@@ -317,6 +361,18 @@ const ContactsView = ({
         onSave={handleSave}
         editingContact={contactModal.data}
         loading={loading}
+      />
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.handleClose}
+        onConfirm={confirmation.handleConfirm}
+        {...confirmation.config}
+      />
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={alert.hideAlert}
+        {...alert.config}
       />
     </ContactsContainer>
   );
