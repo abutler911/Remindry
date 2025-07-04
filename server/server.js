@@ -19,10 +19,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: [
-      "https://genuine-profiterole-3a92c9.netlify.app",
-      "http://localhost:3000",
-    ],
+    origin: ["https://remindry.netlify.app", "http://localhost:3000"],
     credentials: true,
   })
 );
