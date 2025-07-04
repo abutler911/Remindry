@@ -324,14 +324,6 @@ const ReminderCard = ({
         >
           <Trash2 size={16} />
         </DangerButton>
-        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <input
-            type="checkbox"
-            checked={!reminder.isActive}
-            onChange={() => onToggleComplete(reminder._id, !reminder.isActive)}
-          />
-          Mark as Complete
-        </label>
       </ReminderActions>
     </ReminderDetailCard>
   );
