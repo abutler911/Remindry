@@ -235,7 +235,7 @@ const RemindersView = ({
 
   const handleToggleComplete = async (reminderId, newState) => {
     try {
-      await fetch(`/api/reminders/${reminderId}`, {
+      await fetch(`${process.env.REACT_APP_API_URL}/reminders/${reminderId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
