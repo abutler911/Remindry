@@ -1,5 +1,4 @@
-// client/src/services/api.js - Enhanced version
-
+// client/src/services/api.js
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const getAuthHeaders = () => {
@@ -21,7 +20,7 @@ const apiRequest = async (endpoint, options = {}) => {
   const config = {
     headers: {
       "Content-Type": "application/json",
-      ...getAuthHeaders(), // ← Always include auth headers
+      ...getAuthHeaders(),
       ...options.headers,
     },
     ...options,
@@ -44,87 +43,111 @@ const apiRequest = async (endpoint, options = {}) => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Network error", 0, error);
+    throw new ApiError(`Network error: ${error.message}`, 0);
   }
 };
 
-// Reminder API methods
-export const reminderApi = {
-  // Get all reminders
+// Contacts API
+export const contactsApi = {
+  getAll: () => apiRequest("/contacts"),
+
+  create: (contactData) =>
+    apiRequest("/contacts", {
+      method: "POST",
+      body: JSON.stringify(contactData),
+    }),
+
+  update: (id, contactData) =>
+    apiRequest(`/contacts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(contactData),
+    }),
+
+  delete: (id) =>
+    apiRequest(`/contacts/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+// Reminders API
+export const remindersApi = {
   getAll: () => apiRequest("/reminders"),
 
-  // Get single reminder
   getById: (id) => apiRequest(`/reminders/${id}`),
 
-  // Create reminder
   create: (reminderData) =>
     apiRequest("/reminders", {
       method: "POST",
       body: JSON.stringify(reminderData),
     }),
 
-  // Update reminder
   update: (id, reminderData) =>
     apiRequest(`/reminders/${id}`, {
       method: "PUT",
       body: JSON.stringify(reminderData),
     }),
 
-  // Update reminder status (toggle active/inactive)
   updateStatus: (id, isActive) =>
     apiRequest(`/reminders/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ isActive }),
     }),
 
-  // Delete reminder
   delete: (id) =>
     apiRequest(`/reminders/${id}`, {
       method: "DELETE",
     }),
 
-  // Send manual reminder
-  sendManual: (id, contactIds = []) =>
+  sendManual: (id, contactIds = null) =>
     apiRequest(`/reminders/${id}/send`, {
       method: "POST",
       body: JSON.stringify({ contactIds }),
     }),
 };
 
-// Contact API methods
-export const contactApi = {
-  getAll: () => apiRequest("/contacts"),
-  create: (contactData) =>
-    apiRequest("/contacts", {
-      method: "POST",
-      body: JSON.stringify(contactData),
-    }),
-  update: (id, contactData) =>
-    apiRequest(`/contacts/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(contactData),
-    }),
-  delete: (id) =>
-    apiRequest(`/contacts/${id}`, {
-      method: "DELETE",
-    }),
-};
-
-// Message API methods
-export const messageApi = {
+// Messages API
+export const messagesApi = {
   getAll: (page = 1, limit = 50) =>
     apiRequest(`/messages?page=${page}&limit=${limit}`),
+
   getByReminder: (reminderId) => apiRequest(`/messages/reminder/${reminderId}`),
+
   markPaid: (id, isPaid) =>
     apiRequest(`/messages/${id}/paid`, {
       method: "PUT",
       body: JSON.stringify({ isPaid }),
     }),
-  getDashboardStats: () => apiRequest("/messages/stats/dashboard"),
+
+  getStats: () => apiRequest("/messages/stats/dashboard"),
 };
 
-// Export the old methods for backward compatibility
-export const fetchReminders = reminderApi.getAll;
-export const createReminder = reminderApi.create;
-export const updateReminder = reminderApi.update;
-export const deleteReminder = reminderApi.delete;
+// System API
+export const systemApi = {
+  testConnection: () => apiRequest("/test"),
+
+  testSMS: (phone, message) =>
+    apiRequest("/test-sms", {
+      method: "POST",
+      body: JSON.stringify({ phone, message }),
+    }),
+
+  triggerReminders: () =>
+    apiRequest("/trigger-reminders", {
+      method: "POST",
+    }),
+
+  getTextbeltStatus: () => apiRequest("/textbelt-status"),
+};
+
+// Named exports for backward compatibility and consistency
+export const reminderApi = remindersApi;
+export const contactApi = contactsApi;
+export const messageApi = messagesApi;
+
+// Additional backward compatibility exports
+export const fetchReminders = remindersApi.getAll;
+export const createReminder = remindersApi.create;
+export const updateReminder = remindersApi.update;
+export const deleteReminder = remindersApi.delete;
+
+export { ApiError };
