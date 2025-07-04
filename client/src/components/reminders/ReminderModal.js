@@ -55,14 +55,6 @@ const ModalBody = styled.div`
   overflow-y: auto;
 `;
 
-const ModalFooter = styled.div`
-  padding: 1rem 1.5rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
 // Form Styled Components
 const Form = styled.form`
   display: flex;
