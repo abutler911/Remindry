@@ -1,11 +1,12 @@
-// routes/reminders.js
+// server/routes/reminders.js - Fixed version
 const express = require("express");
 const router = express.Router();
 const Reminder = require("../models/Reminder");
 const { sendManualReminder } = require("../services/reminderService");
-const { verifyToken } = require("../middleware/auth");
+// Remove this line - no need to import verifyToken here since it's applied at router level
+// const { verifyToken } = require("../middleware/auth");
 
-// GET all reminders
+// GET all reminders - Protected by router-level middleware
 router.get("/", async (req, res) => {
   try {
     const reminders = await Reminder.find()
@@ -17,7 +18,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET single reminder
+// GET single reminder - Protected by router-level middleware
 router.get("/:id", async (req, res) => {
   try {
     const reminder = await Reminder.findById(req.params.id).populate(
@@ -33,7 +34,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST create reminder - Enhanced with better error handling
+// POST create reminder - Protected by router-level middleware
 router.post("/", async (req, res) => {
   try {
     console.log(
@@ -93,7 +94,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT update reminder
+// PUT update reminder - Protected by router-level middleware
 router.put("/:id", async (req, res) => {
   try {
     const reminder = await Reminder.findByIdAndUpdate(req.params.id, req.body, {
@@ -109,7 +110,23 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// POST send manual reminder
+// PATCH update reminder status - Protected by router-level middleware
+// REMOVED the duplicate verifyToken middleware here!
+router.patch("/:id", async (req, res) => {
+  try {
+    const updated = await Reminder.findByIdAndUpdate(
+      req.params.id,
+      { isActive: req.body.isActive },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    console.error("Failed to update reminder:", error);
+    res.status(500).json({ error: "Failed to update reminder" });
+  }
+});
+
+// POST send manual reminder - Protected by router-level middleware
 router.post("/:id/send", async (req, res) => {
   try {
     const { contactIds } = req.body;
@@ -123,7 +140,7 @@ router.post("/:id/send", async (req, res) => {
   }
 });
 
-// DELETE reminder
+// DELETE reminder - Protected by router-level middleware
 router.delete("/:id", async (req, res) => {
   try {
     const reminder = await Reminder.findByIdAndDelete(req.params.id);
@@ -133,20 +150,6 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Reminder deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  }
-});
-
-router.patch("/:id", verifyToken, async (req, res) => {
-  try {
-    const updated = await Reminder.findByIdAndUpdate(
-      req.params.id,
-      { isActive: req.body.isActive },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (error) {
-    console.error("Failed to update reminder:", error);
-    res.status(500).json({ error: "Failed to update reminder" });
   }
 });
 

@@ -5,7 +5,10 @@ import { Plus, MessageSquare, Clock } from "lucide-react";
 import ReminderCard from "./ReminderCard";
 import ReminderModal from "./ReminderModal";
 import { useModal } from "../../hooks/useModal";
+import { getAuthHeaders } from "../../services/api";
+import { reminderApi } from "../../services/api";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 // Animation keyframes
 const fadeIn = keyframes`
   from {
@@ -211,11 +214,11 @@ const EmptyState = ({ icon: Icon, message }) => (
 const RemindersView = ({
   reminders,
   contacts,
+  loading,
   onCreateReminder,
   onUpdateReminder,
   onDeleteReminder,
   onSendReminder,
-  loading,
 }) => {
   const reminderModal = useModal();
 
@@ -223,42 +226,42 @@ const RemindersView = ({
     reminderModal.open(reminder);
   };
 
-  const handleDelete = async (reminderId) => {
-    if (window.confirm("Are you sure you want to delete this reminder?")) {
+  const handleDelete = async (reminderId, title) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
       try {
+        await reminderApi.delete(reminderId);
         await onDeleteReminder(reminderId);
       } catch (error) {
-        // Error handling is done in parent component
+        console.error("Failed to delete reminder:", error);
       }
     }
   };
 
   const handleToggleComplete = async (reminderId, newState) => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/reminders/${reminderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          // If you're using auth:
-          // Authorization: `Bearer ${authToken}`
-        },
-        body: JSON.stringify({ isActive: newState }),
-      });
-
-      // Re-fetch reminders or optimistically update state
+      await reminderApi.updateStatus(reminderId, newState);
       await onUpdateReminder(reminderId, { isActive: newState });
     } catch (err) {
       console.error("Failed to update reminder:", err);
+      // Optionally show user-friendly error message
     }
   };
 
   const handleSave = async (reminderData) => {
-    if (reminderModal.data) {
-      // Editing existing reminder
-      await onUpdateReminder(reminderModal.data._id, reminderData);
-    } else {
-      // Creating new reminder
-      await onCreateReminder(reminderData);
+    try {
+      if (reminderModal.data) {
+        // Editing existing reminder
+        await reminderApi.update(reminderModal.data._id, reminderData);
+        await onUpdateReminder(reminderModal.data._id, reminderData);
+      } else {
+        // Creating new reminder
+        const newReminder = await reminderApi.create(reminderData);
+        await onCreateReminder(newReminder);
+      }
+      reminderModal.close();
+    } catch (err) {
+      console.error("Failed to save reminder:", err);
+      // Handle error appropriately
     }
   };
 
