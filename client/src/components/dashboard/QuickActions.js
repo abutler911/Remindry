@@ -1,8 +1,10 @@
 // src/components/dashboard/QuickActions.js
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Plus, Wifi, MessageCircle, Users } from "lucide-react";
 import { systemApi } from "../../services/api";
+import Modal from "../ui/Modal";
+import AlertModal from "../ui/AlertModal";
 
 // Styled Components
 const ActionsGrid = styled.div`
@@ -127,84 +129,140 @@ const ButtonDescription = styled.span`
 `;
 
 const QuickActions = ({ onAddContact, onAddReminder }) => {
+  // ✅ useState must be inside the component
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [alert, setAlert] = useState({
+    open: false,
+    type: "info",
+    message: "",
+  });
+
   const handleTestConnection = async () => {
     try {
       const result = await systemApi.testConnection();
-      alert(`Backend connection: ${result.message}`);
-    } catch (error) {
-      alert(
-        "Cannot connect to backend. Make sure server is running on port 5000."
-      );
+      setAlert({ open: true, type: "success", message: result.message });
+    } catch {
+      setAlert({
+        open: true,
+        type: "error",
+        message:
+          "Cannot connect to backend. Make sure server is running on port 5000.",
+      });
     }
   };
 
-  const handleTestSMS = async () => {
-    const phone = prompt("Enter your phone number (e.g., +1234567890):");
-    if (!phone) return;
+  const handleTestSMS = () => {
+    setPhoneInput("");
+    setShowPhoneModal(true);
+  };
 
+  const sendTestSMS = async () => {
     try {
       const result = await systemApi.testSMS(
-        phone,
+        phoneInput,
         "Test message from Remindry dashboard!"
       );
-      alert(`SMS sent successfully! Message ID: ${result.messageId}`);
+      setAlert({
+        open: true,
+        type: "success",
+        message: `SMS sent! ID: ${result.messageId}`,
+      });
     } catch (error) {
-      alert(`SMS failed: ${error.message}`);
+      setAlert({
+        open: true,
+        type: "error",
+        message: `SMS failed: ${error.message}`,
+      });
+    } finally {
+      setShowPhoneModal(false);
     }
   };
 
   return (
-    <ActionsGrid>
-      <ActionGroup>
-        <GroupTitle>System Tests</GroupTitle>
-        <ButtonsContainer>
-          <ActionButton onClick={handleTestConnection}>
-            <SecondaryIcon>
-              <Wifi size={20} />
-            </SecondaryIcon>
-            <ButtonContent>
-              <ButtonLabel>Test Connection</ButtonLabel>
-              <ButtonDescription>Check backend status</ButtonDescription>
-            </ButtonContent>
-          </ActionButton>
+    <>
+      <ActionsGrid>
+        <ActionGroup>
+          <GroupTitle>System Tests</GroupTitle>
+          <ButtonsContainer>
+            <ActionButton onClick={handleTestConnection}>
+              <SecondaryIcon>
+                <Wifi size={20} />
+              </SecondaryIcon>
+              <ButtonContent>
+                <ButtonLabel>Test Connection</ButtonLabel>
+                <ButtonDescription>Check backend status</ButtonDescription>
+              </ButtonContent>
+            </ActionButton>
 
-          <ActionButton onClick={handleTestSMS}>
-            <SecondaryIcon>
-              <MessageCircle size={20} />
-            </SecondaryIcon>
-            <ButtonContent>
-              <ButtonLabel>Test SMS</ButtonLabel>
-              <ButtonDescription>Send test message</ButtonDescription>
-            </ButtonContent>
-          </ActionButton>
-        </ButtonsContainer>
-      </ActionGroup>
+            <ActionButton onClick={handleTestSMS}>
+              <SecondaryIcon>
+                <MessageCircle size={20} />
+              </SecondaryIcon>
+              <ButtonContent>
+                <ButtonLabel>Test SMS</ButtonLabel>
+                <ButtonDescription>Send test message</ButtonDescription>
+              </ButtonContent>
+            </ActionButton>
+          </ButtonsContainer>
+        </ActionGroup>
 
-      <ActionGroup>
-        <GroupTitle>Create New</GroupTitle>
-        <ButtonsContainer>
-          <PrimaryActionButton onClick={onAddContact}>
-            <PrimaryIcon>
-              <Users size={20} />
-            </PrimaryIcon>
-            <ButtonContent>
-              <ButtonLabel>Add Contact</ButtonLabel>
-              <ButtonDescription>Add family member</ButtonDescription>
-            </ButtonContent>
-          </PrimaryActionButton>
+        <ActionGroup>
+          <GroupTitle>Create New</GroupTitle>
+          <ButtonsContainer>
+            <PrimaryActionButton onClick={onAddContact}>
+              <PrimaryIcon>
+                <Users size={20} />
+              </PrimaryIcon>
+              <ButtonContent>
+                <ButtonLabel>Add Contact</ButtonLabel>
+                <ButtonDescription>Add family member</ButtonDescription>
+              </ButtonContent>
+            </PrimaryActionButton>
 
-          <PrimaryActionButton onClick={onAddReminder}>
-            <PrimaryIcon>
-              <Plus size={20} />
-            </PrimaryIcon>
-            <ButtonContent>
-              <ButtonLabel>Add Reminder</ButtonLabel>
-              <ButtonDescription>Create automation</ButtonDescription>
-            </ButtonContent>
-          </PrimaryActionButton>
-        </ButtonsContainer>
-      </ActionGroup>
-    </ActionsGrid>
+            <PrimaryActionButton onClick={onAddReminder}>
+              <PrimaryIcon>
+                <Plus size={20} />
+              </PrimaryIcon>
+              <ButtonContent>
+                <ButtonLabel>Add Reminder</ButtonLabel>
+                <ButtonDescription>Create automation</ButtonDescription>
+              </ButtonContent>
+            </PrimaryActionButton>
+          </ButtonsContainer>
+        </ActionGroup>
+      </ActionsGrid>
+
+      {/* PHONE INPUT MODAL */}
+      <Modal
+        isOpen={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+        title="Enter Your Phone Number"
+        actions={
+          <>
+            <button onClick={() => setShowPhoneModal(false)}>Cancel</button>
+            <button disabled={!phoneInput} onClick={sendTestSMS}>
+              Send
+            </button>
+          </>
+        }
+      >
+        <input
+          value={phoneInput}
+          onChange={(e) => setPhoneInput(e.target.value)}
+          placeholder="+1234567890"
+          style={{ width: "100%", padding: "0.5rem", fontSize: "1rem" }}
+        />
+      </Modal>
+
+      {/* ALERT MODAL */}
+      <AlertModal
+        isOpen={alert.open}
+        onClose={() => setAlert({ ...alert, open: false })}
+        type={alert.type}
+        message={alert.message}
+      />
+    </>
   );
 };
 
