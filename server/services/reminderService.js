@@ -15,13 +15,15 @@ const replaceMessageVariables = (message, contact, reminder) => {
     .replace(/\{title\}/g, reminder.title);
 };
 
-const shouldSendReminder = (reminder, contact) => {
+const shouldSendReminder = (reminder) => {
   const now = new Date();
   const dueDate = new Date(reminder.dueDate);
   const daysDiff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
 
-  // Check if we should send based on reminder offsets
-  return reminder.reminderOffsets.includes(daysDiff);
+  if (reminder.reminderOffsets.includes(daysDiff)) return true;
+  if (now > dueDate) return true;
+
+  return false;
 };
 
 const processScheduledReminders = async () => {
@@ -35,7 +37,7 @@ const processScheduledReminders = async () => {
         if (!contact.isActive) continue;
 
         // Check if we should send this reminder today
-        if (shouldSendReminder(reminder, contact)) {
+        if (shouldSendReminder(reminder)) {
           // Check if we already sent this reminder today
           const today = new Date();
           today.setHours(0, 0, 0, 0);

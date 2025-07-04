@@ -233,6 +233,25 @@ const RemindersView = ({
     }
   };
 
+  const handleToggleComplete = async (reminderId, newState) => {
+    try {
+      await fetch(`/api/reminders/${reminderId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          // If you're using auth:
+          // Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ isActive: newState }),
+      });
+
+      // Re-fetch reminders or optimistically update state
+      await onUpdateReminder(reminderId, { isActive: newState });
+    } catch (err) {
+      console.error("Failed to update reminder:", err);
+    }
+  };
+
   const handleSave = async (reminderData) => {
     if (reminderModal.data) {
       // Editing existing reminder
@@ -291,6 +310,7 @@ const RemindersView = ({
               onEdit={handleEdit}
               onDelete={handleDelete}
               onSend={onSendReminder}
+              onToggleComplete={handleToggleComplete}
             />
           ))}
         </RemindersGrid>

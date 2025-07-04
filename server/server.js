@@ -103,11 +103,12 @@ app.post("/api/trigger-reminders", verifyToken, async (req, res) => {
 });
 
 cron.schedule("0 * * * *", async () => {
-  console.log("⏰ Checking for reminders...");
+  console.log("⏰ Cron: checking for due reminders...");
   try {
-    await reminderService.processScheduledReminders();
-  } catch (error) {
-    console.error("Error processing reminders:", error);
+    const count = await reminderService.processScheduledReminders();
+    console.log(`✅ Cron: ${count} reminders processed.`);
+  } catch (err) {
+    console.error("❌ Cron error:", err);
   }
 });
 

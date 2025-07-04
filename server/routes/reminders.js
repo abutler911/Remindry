@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Reminder = require("../models/Reminder");
 const { sendManualReminder } = require("../services/reminderService");
+const { verifyToken } = require("../middleware/auth");
 
 // GET all reminders
 router.get("/", async (req, res) => {
@@ -132,6 +133,20 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Reminder deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch("/:id", verifyToken, async (req, res) => {
+  try {
+    const updated = await Reminder.findByIdAndUpdate(
+      req.params.id,
+      { isActive: req.body.isActive },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    console.error("Failed to update reminder:", error);
+    res.status(500).json({ error: "Failed to update reminder" });
   }
 });
 

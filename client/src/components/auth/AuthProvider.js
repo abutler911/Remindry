@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkExistingAuth = async () => {
     try {
-      const storedToken = localStorage.getItem("dadbot_token");
+      const storedToken = localStorage.getItem("remindry_token");
       if (!storedToken) {
         setLoading(false);
         return;
@@ -62,18 +62,23 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ password }),
       });
 
-      const data = await response.json();
+      // Prevent hang on empty response
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.warn("⚠️ No response body returned from login");
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data?.error || "Login failed");
       }
 
       // Store token and update state
-      localStorage.setItem("dadbot_token", data.token);
+      localStorage.setItem("remindry_token", data.token);
       setToken(data.token);
       setIsAuthenticated(true);
 
-      // Set up auto-logout timer
       if (data.expiresIn) {
         setTimeout(() => {
           logout();

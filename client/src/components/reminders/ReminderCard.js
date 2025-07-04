@@ -252,7 +252,13 @@ const DangerButton = styled(Button)`
   }
 `;
 
-const ReminderCard = ({ reminder, onEdit, onDelete, onSend }) => {
+const ReminderCard = ({
+  reminder,
+  onEdit,
+  onDelete,
+  onSend,
+  onToggleComplete,
+}) => {
   return (
     <ReminderDetailCard>
       <ReminderHeader>
@@ -261,6 +267,25 @@ const ReminderCard = ({ reminder, onEdit, onDelete, onSend }) => {
           <StatusBadge isActive={reminder.isActive}>
             {reminder.isActive ? "Active" : "Inactive"}
           </StatusBadge>
+          <label
+            style={{
+              marginLeft: "1rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={!reminder.isActive}
+              onChange={() =>
+                onToggleComplete(reminder._id, !reminder.isActive)
+              }
+            />
+            <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+              Mark as Complete
+            </span>
+          </label>
         </ReminderStatus>
       </ReminderHeader>
 
@@ -299,6 +324,14 @@ const ReminderCard = ({ reminder, onEdit, onDelete, onSend }) => {
         >
           <Trash2 size={16} />
         </DangerButton>
+        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <input
+            type="checkbox"
+            checked={!reminder.isActive}
+            onChange={() => onToggleComplete(reminder._id, !reminder.isActive)}
+          />
+          Mark as Complete
+        </label>
       </ReminderActions>
     </ReminderDetailCard>
   );
