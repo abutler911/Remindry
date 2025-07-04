@@ -42,11 +42,11 @@ export const AuthProvider = ({ children }) => {
         setToken(storedToken);
         setIsAuthenticated(true);
       } else {
-        localStorage.removeItem("dadbot_token");
+        localStorage.removeItem("remindry_token");
       }
     } catch (error) {
       console.error("Auth check failed:", error);
-      localStorage.removeItem("dadbot_token");
+      localStorage.removeItem("remindry_token");
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("dadbot_token");
+    localStorage.removeItem("remindry_token");
     setToken(null);
     setIsAuthenticated(false);
   };
