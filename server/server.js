@@ -93,27 +93,90 @@ app.get("/api/test", verifyToken, (req, res) => {
   res.json({ message: "🤖 Remindry is alive and secure!" });
 });
 
+// Enhanced manual trigger endpoint with better response
 app.post("/api/trigger-reminders", verifyToken, async (req, res) => {
   try {
-    await reminderService.processScheduledReminders();
-    res.json({ message: "Reminders processed successfully" });
+    console.log("🔄 Manual reminder trigger initiated by user");
+    const count = await reminderService.processScheduledReminders();
+    res.json({
+      message: "Reminders processed successfully",
+      remindersSent: count,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
+    console.error("❌ Manual trigger failed:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-cron.schedule("0 * * * *", async () => {
-  console.log("⏰ Cron: checking for due reminders...");
-  try {
-    const count = await reminderService.processScheduledReminders();
-    console.log(`✅ Cron: ${count} reminders processed.`);
-  } catch (err) {
-    console.error("❌ Cron error:", err);
+// Enhanced cron job with better logging and error handling
+cron.schedule(
+  "0 * * * *",
+  async () => {
+    const timestamp = new Date().toISOString();
+    console.log(`\n⏰ [${timestamp}] Cron: Starting hourly reminder check...`);
+
+    try {
+      const startTime = Date.now();
+      const count = await reminderService.processScheduledReminders();
+      const duration = Date.now() - startTime;
+
+      if (count > 0) {
+        console.log(
+          `✅ [${new Date().toISOString()}] Cron: Successfully sent ${count} reminder${
+            count === 1 ? "" : "s"
+          } (${duration}ms)`
+        );
+      } else {
+        console.log(
+          `✅ [${new Date().toISOString()}] Cron: No reminders to send at this time (${duration}ms)`
+        );
+      }
+
+      // Log next scheduled run
+      const nextHour = new Date();
+      nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+      console.log(
+        `📅 Next cron check scheduled for: ${nextHour.toISOString()}\n`
+      );
+    } catch (err) {
+      console.error(`❌ [${new Date().toISOString()}] Cron error:`, err);
+      console.error("Full error details:", err.stack);
+
+      // In production, you might want to send alerts here
+      // e.g., sendSlackAlert(`Cron job failed: ${err.message}`);
+    }
+  },
+  {
+    scheduled: true,
+    timezone: "America/New_York", // Adjust to your timezone
   }
+);
+
+// New endpoint to check cron job status and next run time
+app.get("/api/cron-status", verifyToken, (req, res) => {
+  const nextHour = new Date();
+  nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+
+  res.json({
+    status: "active",
+    schedule: "Every hour at minute 0",
+    nextRun: nextHour.toISOString(),
+    timezone: "America/New_York",
+    lastChecked: new Date().toISOString(),
+  });
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: Date.now() });
+  res.json({
+    status: "ok",
+    timestamp: Date.now(),
+    services: {
+      database:
+        mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+      sms: !!process.env.TEXTBELT_API_KEY ? "configured" : "not configured",
+    },
+  });
 });
 
 app.use((err, req, res, next) => {
@@ -134,11 +197,44 @@ const server = app.listen(PORT, () => {
   console.log(
     `🔐 Authentication: ${process.env.JWT_SECRET ? "ENABLED" : "DISABLED"}`
   );
-  console.log(`📱 SMS Protection: All endpoints require authentication`);
+  console.log(
+    `📱 SMS Provider: ${
+      process.env.TEXTBELT_API_KEY ? "Textbelt CONFIGURED" : "NOT CONFIGURED"
+    }`
+  );
+  console.log(
+    `⏰ Cron Job: Scheduled to run every hour (timezone: America/New_York)`
+  );
+
+  // Log the next cron run time on startup
+  const nextHour = new Date();
+  nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+  console.log(`📅 Next automated reminder check: ${nextHour.toISOString()}`);
 });
 
 process.on("SIGINT", async () => {
-  console.log("👋 Shutting down server...");
-  await mongoose.disconnect();
-  server.close(() => process.exit(0));
+  console.log("👋 Shutting down server gracefully...");
+  try {
+    await mongoose.disconnect();
+    console.log("📊 Database connection closed");
+    server.close(() => {
+      console.log("🛑 Server stopped");
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error("Error during shutdown:", error);
+    process.exit(1);
+  }
+});
+
+// Graceful shutdown for production
+process.on("SIGTERM", async () => {
+  console.log("👋 SIGTERM received, shutting down gracefully...");
+  try {
+    await mongoose.disconnect();
+    server.close(() => process.exit(0));
+  } catch (error) {
+    console.error("Error during SIGTERM shutdown:", error);
+    process.exit(1);
+  }
 });
