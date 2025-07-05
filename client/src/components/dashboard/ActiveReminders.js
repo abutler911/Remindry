@@ -1,7 +1,16 @@
 // src/components/dashboard/ActiveReminders.js
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import { Send, Edit, MessageSquare, Plus } from "lucide-react";
+import {
+  Send,
+  Edit,
+  MessageSquare,
+  Plus,
+  ChevronRight,
+  Clock,
+  Users,
+  DollarSign,
+} from "lucide-react";
 
 // Animation keyframes
 const fadeIn = keyframes`
@@ -15,7 +24,18 @@ const fadeIn = keyframes`
   }
 `;
 
-// Styled Components for ActiveReminders
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+// Styled Components
 const RemindersContainer = styled.div`
   background: white;
   border-radius: 16px;
@@ -39,87 +59,146 @@ const SectionTitle = styled.h2`
 `;
 
 const RemindersContent = styled.div`
-  padding: 1.5rem;
+  padding: 0; // Remove padding for list items to go edge-to-edge
 `;
 
 const RemindersList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 `;
 
-const ReminderCardContainer = styled.div`
-  background: rgb(184, 182, 223);
-  border: 1px solid gray;
-  border-radius: 12px;
-  padding: 1.25rem;
-  transition: all 0.3s ease;
-  animation: ${fadeIn} 0.4s ease-out;
+// New: Compact reminder list item
+const ReminderListItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  animation: ${slideIn} 0.3s ease-out;
 
   &:hover {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    padding-left: 1.25rem; // Compensate for border
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
     background: #f1f5f9;
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: scale(0.995);
   }
 `;
 
-const ReminderInfo = styled.div`
+const ReminderMainInfo = styled.div`
   flex: 1;
-  margin-bottom: 1rem;
+  min-width: 0; // Allow text truncation
 `;
 
 const ReminderTitle = styled.h3`
-  font-size: 1.7rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #1a202c;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
   line-height: 1.3;
+
+  // Truncate long titles
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
-const ReminderDetails = styled.p`
-  font-size: 0.8rem;
-  color: rgb(0, 0, 0);
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
+const ReminderSummary = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
 `;
 
-const ReminderMessage = styled.p`
-  font-size: 0.875rem;
-  color: #475569;
+const ReminderMeta = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #64748b;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0.7;
+  }
+`;
+
+const ReminderPreview = styled.p`
+  font-size: 0.75rem;
+  color: #64748b;
   margin: 0;
-  font-style: italic;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 8px;
-  border-left: 3px solid #3b82f6;
-  line-height: 1.4;
+  line-height: 1.3;
+
+  // Truncate message preview
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 250px;
+
+  @media (max-width: 768px) {
+    max-width: 150px;
+  }
 `;
 
 const ReminderActions = styled.div`
   display: flex;
-  gap: 0.75rem;
-  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 `;
 
-// Button Components
-const Button = styled.button`
-  display: inline-flex;
+const StatusIndicator = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${(props) =>
+    props.isOverdue ? "#ef4444" : props.isDueSoon ? "#f59e0b" : "#10b981"};
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+`;
+
+const ChevronIcon = styled.div`
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+
+  ${ReminderListItem}:hover & {
+    transform: translateX(2px);
+    color: #64748b;
+  }
+`;
+
+// Compact action buttons
+const ActionButton = styled.button`
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: ${(props) =>
-    props.size === "sm" ? "0.5rem 1rem" : "0.75rem 1.5rem"};
-  border-radius: 8px;
-  font-size: ${(props) => (props.size === "sm" ? "0.8rem" : "0.875rem")};
-  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: none;
+  min-width: 32px;
+  height: 32px;
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
 
   &:disabled {
@@ -128,31 +207,166 @@ const Button = styled.button`
   }
 `;
 
-const PrimaryButton = styled(Button)`
-  background: rgb(78, 156, 85);
+const SendButton = styled(ActionButton)`
+  background: #10b981;
   color: white;
 
   &:hover:not(:disabled) {
-    background: rgb(136, 202, 105);
-    transform: translateY(-1px);
+    background: #059669;
+    transform: scale(1.05);
   }
 `;
 
-const IconButton = styled(Button)`
+const EditButton = styled(ActionButton)`
   background: #f8fafc;
   color: #475569;
   border: 1px solid #e2e8f0;
-  padding: 0.5rem;
-  min-width: auto;
 
   &:hover:not(:disabled) {
     background: #f1f5f9;
     border-color: #cbd5e1;
+  }
+`;
+
+// ViewMore component for when there are many reminders
+const ViewMoreButton = styled.button`
+  width: 100%;
+  padding: 1rem;
+  background: #f8fafc;
+  border: none;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: #f1f5f9;
     color: #334155;
   }
 `;
 
-// Empty State Components
+// Utility functions
+const isOverdue = (dueDate) => {
+  if (!dueDate) return false;
+  return new Date(dueDate) < new Date();
+};
+
+const isDueSoon = (dueDate) => {
+  if (!dueDate) return false;
+  const today = new Date();
+  const due = new Date(dueDate);
+  const diffTime = due - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 3 && diffDays >= 0;
+};
+
+const formatDueDate = (dueDate) => {
+  if (!dueDate) return "No due date";
+
+  const today = new Date();
+  const due = new Date(dueDate);
+  const diffTime = due - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Due today";
+  if (diffDays === 1) return "Due tomorrow";
+  if (diffDays === -1) return "Due yesterday";
+  if (diffDays < -1) return `${Math.abs(diffDays)} days overdue`;
+  if (diffDays <= 7) return `Due in ${diffDays} days`;
+
+  return due.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const truncateMessage = (message, maxLength = 60) => {
+  if (!message || message.length <= maxLength) return message;
+  return message.substring(0, maxLength) + "...";
+};
+
+// Components
+const ReminderListItemComponent = ({
+  reminder,
+  onSend,
+  onEdit,
+  onViewDetails,
+  index,
+}) => {
+  const handleClick = (e) => {
+    // Don't trigger if clicking on action buttons
+    if (e.target.closest("button")) return;
+    onViewDetails(reminder);
+  };
+
+  const handleSend = (e) => {
+    e.stopPropagation();
+    onSend(reminder._id);
+  };
+
+  const handleEdit = (e) => {
+    e.stopPropagation();
+    onEdit(reminder);
+  };
+
+  return (
+    <ReminderListItem
+      onClick={handleClick}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <StatusIndicator
+        isOverdue={isOverdue(reminder.dueDate)}
+        isDueSoon={isDueSoon(reminder.dueDate)}
+      />
+
+      <ReminderMainInfo>
+        <ReminderTitle>{reminder.title}</ReminderTitle>
+
+        <ReminderSummary>
+          <ReminderMeta>
+            <Clock />
+            {formatDueDate(reminder.dueDate)}
+          </ReminderMeta>
+
+          {reminder.amount && (
+            <ReminderMeta>
+              <DollarSign />${reminder.amount}
+            </ReminderMeta>
+          )}
+
+          <ReminderMeta>
+            <Users />
+            {reminder.recipients?.length || 0} recipient
+            {reminder.recipients?.length !== 1 ? "s" : ""}
+          </ReminderMeta>
+        </ReminderSummary>
+
+        <ReminderPreview>{truncateMessage(reminder.message)}</ReminderPreview>
+      </ReminderMainInfo>
+
+      <ReminderActions>
+        <SendButton onClick={handleSend} title="Send reminder now">
+          <Send size={14} />
+        </SendButton>
+
+        <EditButton onClick={handleEdit} title="Edit reminder">
+          <Edit size={14} />
+        </EditButton>
+      </ReminderActions>
+
+      <ChevronIcon>
+        <ChevronRight size={16} />
+      </ChevronIcon>
+    </ReminderListItem>
+  );
+};
+
+// Empty State Components (keeping existing)
 const EmptyStateContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -182,6 +396,26 @@ const EmptyStateMessage = styled.p`
   line-height: 1.6;
 `;
 
+const PrimaryButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+`;
+
 const LoadingMessage = styled.p`
   text-align: center;
   color: #64748b;
@@ -189,40 +423,6 @@ const LoadingMessage = styled.p`
   margin: 2rem 0;
   animation: ${fadeIn} 0.4s ease-out;
 `;
-
-// Components
-const ReminderItem = ({ reminder, onSend, onEdit }) => {
-  return (
-    <ReminderCardContainer>
-      <ReminderInfo>
-        <ReminderTitle>{reminder.title}</ReminderTitle>
-        <ReminderDetails>
-          {reminder.amount && `$${reminder.amount} • `}
-          Due:{" "}
-          {reminder.dueDate
-            ? new Date(reminder.dueDate).toLocaleDateString()
-            : "No date set"}{" "}
-          • Recipients:{" "}
-          {reminder.recipients?.map((r) => r.name).join(", ") ||
-            "No recipients"}
-        </ReminderDetails>
-        <ReminderMessage>"{reminder.message}"</ReminderMessage>
-      </ReminderInfo>
-      <ReminderActions>
-        <PrimaryButton size="sm" onClick={() => onSend(reminder._id)}>
-          <Send size={14} />
-          Send
-        </PrimaryButton>
-        <IconButton
-          onClick={() => onEdit(reminder)}
-          aria-label={`Edit ${reminder.title}`}
-        >
-          <Edit size={16} />
-        </IconButton>
-      </ReminderActions>
-    </ReminderCardContainer>
-  );
-};
 
 const EmptyState = ({ icon: Icon, message, action }) => (
   <EmptyStateContainer>
@@ -234,7 +434,16 @@ const EmptyState = ({ icon: Icon, message, action }) => (
   </EmptyStateContainer>
 );
 
-const ActiveReminders = ({ reminders, onSend, onEdit, onAdd, loading }) => {
+// Main component
+const ActiveReminders = ({
+  reminders,
+  onSend,
+  onEdit,
+  onAdd,
+  onViewDetails, // New prop for viewing full reminder
+  loading,
+  maxDisplayCount = 5, // Configurable limit for dashboard
+}) => {
   if (loading) {
     return (
       <RemindersContainer>
@@ -251,6 +460,9 @@ const ActiveReminders = ({ reminders, onSend, onEdit, onAdd, loading }) => {
     );
   }
 
+  const displayedReminders = reminders.slice(0, maxDisplayCount);
+  const hasMore = reminders.length > maxDisplayCount;
+
   return (
     <RemindersContainer>
       <SectionHeader>
@@ -259,6 +471,7 @@ const ActiveReminders = ({ reminders, onSend, onEdit, onAdd, loading }) => {
           Active Reminders
         </SectionTitle>
       </SectionHeader>
+
       <RemindersContent>
         {reminders.length === 0 ? (
           <EmptyState
@@ -272,16 +485,27 @@ const ActiveReminders = ({ reminders, onSend, onEdit, onAdd, loading }) => {
             }
           />
         ) : (
-          <RemindersList>
-            {reminders.map((reminder) => (
-              <ReminderItem
-                key={reminder._id}
-                reminder={reminder}
-                onSend={onSend}
-                onEdit={onEdit}
-              />
-            ))}
-          </RemindersList>
+          <>
+            <RemindersList>
+              {displayedReminders.map((reminder, index) => (
+                <ReminderListItemComponent
+                  key={reminder._id}
+                  reminder={reminder}
+                  onSend={onSend}
+                  onEdit={onEdit}
+                  onViewDetails={onViewDetails}
+                  index={index}
+                />
+              ))}
+            </RemindersList>
+
+            {hasMore && (
+              <ViewMoreButton onClick={() => onViewDetails("viewAll")}>
+                View {reminders.length - maxDisplayCount} more reminders
+                <ChevronRight size={16} />
+              </ViewMoreButton>
+            )}
+          </>
         )}
       </RemindersContent>
     </RemindersContainer>

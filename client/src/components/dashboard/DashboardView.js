@@ -1,3 +1,4 @@
+// src/components/dashboard/DashboardView.js
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import DashboardStats from "./DashboardStats";
@@ -227,8 +228,21 @@ const DashboardView = ({
   onAddReminder,
   onSendReminder,
   onEditReminder,
+  onNavigateToReminders, // New prop for navigation
+  onViewReminderDetails, // New prop for viewing specific reminder
   loading,
 }) => {
+  // Handle different types of reminder navigation
+  const handleViewDetails = (reminderOrAction) => {
+    if (reminderOrAction === "viewAll") {
+      // Navigate to reminders tab to see all reminders
+      onNavigateToReminders();
+    } else {
+      // Open specific reminder details (modal or detail view)
+      onViewReminderDetails(reminderOrAction);
+    }
+  };
+
   return (
     <DashboardContainer>
       <WelcomeSection>
@@ -269,7 +283,9 @@ const DashboardView = ({
               onSend={onSendReminder}
               onEdit={onEditReminder}
               onAdd={onAddReminder}
+              onViewDetails={handleViewDetails} // Pass the new handler
               loading={loading}
+              maxDisplayCount={5} // Show only 5 reminders on dashboard
             />
           </ContentCard>
         </RemindersSection>

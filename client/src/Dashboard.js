@@ -11,6 +11,7 @@ import { useModal } from "./hooks/useModal";
 import { useAlert } from "./hooks/useAlert";
 import ContactModal from "./components/contacts/ContactModal";
 import ReminderModal from "./components/reminders/ReminderModal";
+import ReminderDetailModal from "./components/reminders/ReminderDetailModal";
 
 // Styled Components for Error State
 const ErrorContainer = styled.div`
@@ -91,6 +92,12 @@ const Dashboard = () => {
   const contactModal = useModal();
   const reminderModal = useModal();
   const alert = useAlert();
+
+  // New: Reminder detail modal state
+  const [reminderDetailModal, setReminderDetailModal] = useState({
+    isOpen: false,
+    reminder: null,
+  });
 
   // Handle contact operations
   const handleCreateContact = async (contactData) => {
@@ -257,6 +264,33 @@ const Dashboard = () => {
     reminderModal.open(reminder);
   };
 
+  // New: Navigation handlers for dashboard reminder interactions
+  const handleNavigateToReminders = () => {
+    setActiveTab("reminders");
+  };
+
+  const handleViewReminderDetails = (reminder) => {
+    setReminderDetailModal({
+      isOpen: true,
+      reminder: reminder,
+    });
+  };
+
+  const closeReminderDetail = () => {
+    setReminderDetailModal({
+      isOpen: false,
+      reminder: null,
+    });
+  };
+
+  // Enhanced edit reminder handler that works from detail modal
+  const handleEditReminderFromDetail = (reminder) => {
+    // Close detail modal first
+    closeReminderDetail();
+    // Then open edit modal
+    reminderModal.open(reminder);
+  };
+
   // Error display
   if (error) {
     return (
@@ -308,6 +342,8 @@ const Dashboard = () => {
             onAddReminder={handleAddReminder}
             onSendReminder={handleSendReminder}
             onEditReminder={handleEditReminder}
+            onNavigateToReminders={handleNavigateToReminders}
+            onViewReminderDetails={handleViewReminderDetails}
             loading={loading}
           />
         );
@@ -317,6 +353,7 @@ const Dashboard = () => {
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
       {renderCurrentView()}
+
       <ContactModal
         isOpen={contactModal.isOpen}
         onClose={contactModal.close}
@@ -330,6 +367,14 @@ const Dashboard = () => {
         onSave={handleCreateReminder}
         contacts={contacts}
         loading={loading}
+      />
+
+      <ReminderDetailModal
+        isOpen={reminderDetailModal.isOpen}
+        onClose={closeReminderDetail}
+        reminder={reminderDetailModal.reminder}
+        onSend={handleSendReminder}
+        onEdit={handleEditReminderFromDetail}
       />
 
       <AlertModal
