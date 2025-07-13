@@ -251,6 +251,36 @@ const Dashboard = () => {
     }
   };
 
+  const handleSaveReminder = async (reminderData) => {
+  const isEditing = !!reminderModal.data?._id;
+
+  try {
+    if (isEditing) {
+      await updateReminder(reminderModal.data._id, reminderData);
+      alert.showAlert({
+        title: "Updated",
+        message: "Reminder updated successfully!",
+        type: "success",
+      });
+    } else {
+      await createReminder(reminderData);
+      alert.showAlert({
+        title: "Created",
+        message: "Reminder created successfully!",
+        type: "success",
+      });
+    }
+  } catch (error) {
+    alert.showAlert({
+      title: "Error",
+      message: `Failed to save reminder: ${error.message}`,
+      type: "error",
+    });
+    throw error;
+  }
+};
+
+
   // Modal handlers
   const handleAddContact = () => {
     contactModal.open();
@@ -362,12 +392,13 @@ const Dashboard = () => {
       />
 
       <ReminderModal
-        isOpen={reminderModal.isOpen}
-        onClose={reminderModal.close}
-        onSave={handleCreateReminder}
-        contacts={contacts}
-        loading={loading}
-      />
+  isOpen={reminderModal.isOpen}
+  onClose={reminderModal.close}
+  onSave={handleSaveReminder} 
+  contacts={contacts}
+  editingReminder={reminderModal.data} 
+  loading={loading}
+/>
 
       <ReminderDetailModal
         isOpen={reminderDetailModal.isOpen}
