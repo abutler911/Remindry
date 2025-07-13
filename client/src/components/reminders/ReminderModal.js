@@ -387,11 +387,12 @@ const ReminderModal = ({
     };
 
     try {
-      await onSave(reminderData);
-      onClose();
-    } catch (error) {
-      console.error("Save failed", error);
-    }
+  const { _id, ...cleanedData } = reminderData; // <-- Remove _id
+  await onSave(cleanedData);
+  onClose();
+} catch (error) {
+  console.error("Save failed", error);
+}
   };
 
   const handleOverlayClick = (e) => {

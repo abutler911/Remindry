@@ -75,13 +75,15 @@ export const remindersApi = {
 
   getById: (id) => apiRequest(`/reminders/${id}`),
 
-  create: (reminderData) =>
-    apiRequest("/reminders", {
+  create: (reminderData) => {
+    const {_id, ...clean} = reminderData;
+    return apiRequest("/reminders", {
       method: "POST",
-      body: JSON.stringify(reminderData),
-    }),
-
-  update: (id, reminderData) =>
+      body: JSON.stringify(clean),
+    });
+  },
+  
+    update: (id, reminderData) =>
     apiRequest(`/reminders/${id}`, {
       method: "PUT",
       body: JSON.stringify(reminderData),
